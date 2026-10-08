@@ -1,2 +1,40 @@
-# Model hyperparameters for training (XGBoost and scikit-learn baselines).
-# Consumed by adshield.models.train via adshield.config.
+# Training configuration for adshield.models.classifier.
+
+seed: 42
+
+# Chronological split by click_time (never shuffled). test = the remaining final slice.
+split:
+  train_frac: 0.6
+  val_frac: 0.2
+
+# Categorical risk encoding (fitted on the training period only).
+risk_encoder:
+  keys: [app, channel, os]
+  smoothing: 20.0
+  n_folds: 5      # out-of-fold encoding for training rows
+
+xgboost:
+  # Passed to every trial unchanged. Early stopping uses the validation period.
+  fixed:
+    n_estimators: 500
+    early_stopping_rounds: 30
+    eval_metric: logloss
+    tree_method: hist
+    subsample: 0.8
+    colsample_bytree: 0.8
+  # Full cartesian product is trained; every trial is logged. 8 trials.
+  grid:
+    max_depth: [4, 6]
+    learning_rate: [0.05, 0.1]
+    min_child_weight: [1, 20]
+
+shap:
+  sample_size: 5000   # test rows used for the global importance report
+  top_k: 5            # per-row contributors returned by TrainedModel.explain
+
+comparison:
+  # Minimum absolute improvement (PR-AUC and F1, minority-class view) for the
+  # report to say the model "clearly" beats the rule baseline.
+  min_margin: 0.02
+  # Below this many minority-class rows in the test set the report says "inconclusive".
+  min_minority_rows: 500

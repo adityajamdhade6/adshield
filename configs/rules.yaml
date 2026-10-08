@@ -1,0 +1,55 @@
+# Rule-based baseline for adshield.models.rule_engine.
+#
+# Every rule adds `points` to a click's risk score when ALL of its conditions
+# hold; the total is capped at `max_score`. A rule whose feature is NaN (not
+# enough history yet) does not fire.
+#
+# These weights and thresholds are initial values reasoned from how each
+# behaviour separates humans from scripts. They have NOT been fitted to the
+# TalkingData data: review them against notebooks/01_eda.ipynb results and
+# the threshold sweep from `python -m adshield.models.evaluate` before relying
+# on them. Any change here changes the config hash recorded in audit output.
+
+version: 1
+max_score: 100
+decision_threshold: 50   # score >= threshold => flagged
+
+rules:
+  - name: velocity_10min_burst
+    description: 10+ clicks from one IP within 10 minutes; beyond human click pace.
+    points: 35
+    conditions:
+      - {feature: clicks_ip_10min, op: ">=", threshold: 10}
+
+  - name: velocity_1h_sustained
+    description: 60+ clicks from one IP within an hour; sustained automated volume.
+    points: 15
+    conditions:
+      - {feature: clicks_ip_1h, op: ">=", threshold: 60}
+
+  - name: velocity_24h_extreme
+    description: 300+ clicks from one IP within 24 hours.
+    points: 10
+    conditions:
+      - {feature: clicks_ip_24h, op: ">=", threshold: 300}
+
+  - name: metronomic_clicks
+    description: At least 5 observed gaps and gap std <= 2s; evenly spaced, timer-driven clicking.
+    points: 25
+    conditions:
+      - {feature: ip_gap_count, op: ">=", threshold: 5}
+      - {feature: ip_gap_std_s, op: "<=", threshold: 2.0}
+
+  - name: scripted_repetition
+    description: 10+ clicks and at most 20% distinct app/device/os/channel combinations; replaying one request.
+    points: 20
+    conditions:
+      - {feature: ip_click_count, op: ">=", threshold: 10}
+      - {feature: ip_unique_ratio, op: "<=", threshold: 0.2}
+
+  - name: risky_traffic_source
+    description: app/channel/os combination has a high smoothed historical non-conversion rate.
+    points: 15
+    conditions:
+      # Must sit above the training base rate to mean anything; calibrate after EDA.
+      - {feature: cat_risk_app_channel_os, op: ">=", threshold: 0.999}

@@ -15,7 +15,9 @@ venv/
 data/*
 !data/.gitkeep
 
-# Model artifacts
+# Model artifacts (versioned run directories under models/ are local outputs)
+models/*
+!models/.gitkeep
 *.joblib
 *.pkl
 *.ubj
@@ -24,3 +26,25 @@ data/*
 .DS_Store
 .idea/
 .vscode/
+
+# Secrets and credentials (never commit)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+kaggle.json
+.kaggle/
+.streamlit/secrets.toml
+secrets.*
+credentials*.json
+
+# Tooling caches and reports
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.mypy_cache/
+.ruff_cache/
+
