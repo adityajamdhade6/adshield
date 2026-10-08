@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Virtual environments
+.venv/
+venv/
+
+# Data (keep directory only)
+data/*
+!data/.gitkeep
+
+# Model artifacts
+*.joblib
+*.pkl
+*.ubj
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

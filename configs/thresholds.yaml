@@ -1,0 +1,2 @@
+# Decision thresholds for fraud scoring (e.g. flag/review/block cutoffs).
+# Consumed by adshield.models.evaluate and adshield.api via adshield.config.

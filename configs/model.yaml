@@ -1,0 +1,2 @@
+# Model hyperparameters for training (XGBoost and scikit-learn baselines).
+# Consumed by adshield.models.train via adshield.config.
